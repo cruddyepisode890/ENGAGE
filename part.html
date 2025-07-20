@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participants List with Bio Data</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4fc3f7;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .participants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .participant-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .participant-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .participant-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .participant-content {
+            padding: 20px;
+        }
+
+        .participant-name {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .participant-title {
+            color: var(--secondary-color);
+            font-weight: 500;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .participant-bio {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .expanded {
+            max-height: 500px;
+        }
+
+        .toggle-bio {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-bio:hover {
+            background-color: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .participants-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Event Participants</h1>
+            <p>Meet our distinguished participants and learn about their backgrounds</p>
+        </header>
+
+        <div class="participants-grid" id="participantsContainer">
+            <!-- Participant cards will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        function getRandomColor() {
+            const colors = ['4a6fa5', '166088', '4fc3f7', '00b4d8', '0077b6', '0096c7', '48cae4'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const participants = [
+                {
+                    name: "Dr. Sarah Johnson",
+                    title: "Senior Researcher - Neural Networks",
+                    bio: "Dr. Johnson leads AI research at Stanford University...",
+                    imageAlt: "African American woman in her 40s...",
+                    imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/4fe7e9fa-5c57-420e-a344-b235f3f9ce18.png"
+                },
+                {
+                    name: "Dr. Sarah Johnson",
+                    title: "Senior Researcher - Neural Networks",
+                    bio: "Dr. Johnson leads AI research at Stanford University with over 15 years of experience in deep learning architectures. Her groundbreaking work on transformer models has been published in Nature and Science.",
+                    imageAlt: "African American woman in her 40s wearing glasses and a lab coat, standing in a modern research laboratory",
+                    imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/070b23fa-7bfe-4207-99f4-a919c10b423c.png"
+                },
+                {
+                    name: "James Wilson",
+                    title: "CEO - Tech Innovations Inc.",
+                    bio: "Serial entrepreneur with 5 successful startup exits. Current venture focuses on sustainable tech solutions for urban environments. Named Forbes 30 Under 30 in Technology.",
+                    imageAlt: "Asian man in his late 20s wearing a navy blue blazer, smiling confidently in a modern office setting",
+                    imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1b63c596-e74a-4f94-9814-cda3a0ef00bc.png"
+                },
+                {
+                    name: "Maria Garcia",
+                    title: "Lead Software Engineer - Cloud Computing",
+                    bio: "Specializes in distributed systems at Microsoft Azure. Open source contributor and mentor for women in tech programs. Developed several widely-used libraries for microservices architecture.",
+                    imageAlt: "Hispanic woman in her early 30s with long dark hair wearing a casual dress, standing in front of a server rack",
+                    imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8c0b8787-9eb1-4cc2-9266-8783a9fdbb7c.png"
+                },
+                {
+                    name: "Prof. David Chen",
+                    title: "Director - Robotics Institute",
+                    bio: "Pioneer in robotic mobility systems with 50+ patents. Leads a team of 200 researchers developing autonomous solutions for healthcare and industrial applications. TED speaker and MacArthur Fellow.",
+                    imageAlt: "Middle-aged Asian man with short gray hair wearing a collared shirt, gesturing while explaining robotics concepts",
+                    imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8b09fe37-ee43-4d92-865b-77df10aed8fe.png"
+                },
+                {
+                    name: "Emma Williams",
+                    title: "UX Designer - Creative Solutions",
+                    bio: "Award-winning designer specializing in human-centered AI interfaces. Created innovative UI patterns now adopted by major tech companies. Passionate about accessible design and cognitive psychology.",
+                    imageAlt: "Young Caucasian woman with blonde hair in a bun wearing round glasses and a stylish sweater, sketching in a notebook at a design studio",
+                    imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/84b6338c-8c53-4330-8d60-b6753fde62c3.png"
+                },
+                {
+                    name: "Dr. Amir Khan",
+                    title: "Chief Data Scientist - Healthcare Analytics",
+                    bio: "Developed predictive models for disease outbreaks used by WHO. His research on AI-assisted diagnosis has improved treatment outcomes across 30 countries. Regularly advises governments on health policy.",
+                    imageAlt: "South Asian man in his 50s with short beard wearing a suit and tie, standing in a hospital hallway holding a tablet",
+                    imageUrl: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0921f9b6-f98d-4b68-95d3-9f23f8f182ad.png"
+                }
+            ];
+
+            const container = document.getElementById('participantsContainer');
+
+            participants.forEach((participant, index) => {
+                const card = document.createElement('div');
+                card.className = 'participant-card';
+                
+                card.innerHTML = `
+                    <img src="${participant.imageUrl}" alt="${participant.imageAlt}" class="participant-image">
+                    <div class="participant-content">
+                        <h3 class="participant-name">${participant.name}</h3>
+                        <p class="participant-title">${participant.title}</p>
+                        <div class="participant-bio" id="bio-${index}">
+                            <p>${participant.bio}</p>
+                        </div>
+                        <button class="toggle-bio" onclick="toggleBio(${index})">Read Bio</button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+
+            window.toggleBio = function(index) {
+                const bio = document.getElementById(`bio-${index}`);
+                const button = document.querySelector(`#bio-${index}`).nextElementSibling;
+                
+                bio.classList.toggle('expanded');
+                button.textContent = bio.classList.contains('expanded') ? 'Hide Bio' : 'Read Bio';
+            };
+        });
+    </script>
+</body>
+</html>
+
