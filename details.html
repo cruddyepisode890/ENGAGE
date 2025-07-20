@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participant Engagement Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .radial-progress {
+            --value: 0;
+            --size: 4rem;
+            --thickness: 8px;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .poll-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #f8f8f8;
+            --text-secondary: #d1d1d1;
+        }
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+        }
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+    </style>
+</head>
+<body data-theme="light" class="font-sans antialiased">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white p-4 shadow-md">
+            <div class="container mx-auto flex justify-between items-center">
+                <h1 class="text-2xl font-bold">Participant Engagement Dashboard</h1>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-blue-700 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="container mx-auto p-4 space-y-8">
+            <!-- Overview Cards -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-semibold text-[var(--text-secondary)]">Total Participants</h3>
+                    <p class="text-3xl font-bold">142 <span class="text-green-500 text-sm">+12%</span></p>
+                </div>
+                <div class="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-semibold text-[var(--text-secondary)]">Avg. Engagement</h3>
+                    <div class="radial-progress text-blue-500" style="--value:76;">76%</div>
+                </div>
+                <div class="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-semibold text-[var(--text-secondary)]">Questions Asked</h3>
+                    <p class="text-3xl font-bold">84 <span class="text-blue-500 text-sm">+5 today</span></p>
+                </div>
+                <div class="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-semibold text-[var(--text-secondary)]">Polls Completed</h3>
+                    <p class="text-3xl font-bold">3/5 <span class="text-yellow-500 text-sm">60%</span></p>
+                </div>
+            </section>
+
+            <!-- Sessions Timeline -->
+            <section class="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-sm">
+                <h2 class="text-xl font-bold mb-4">Session Timeline</h2>
+                <div class="space-y-4">
+                    <div class="flex items-start pb-4 border-b border-gray-300">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/4c6c966c-348d-4c50-a24f-489c8cb0b8b9.png" alt="Young female speaker with dark hair presenting at conference podium" class="rounded-full" />
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between">
+                                <h3 class="font-semibold">Opening Keynote</h3>
+                                <span class="text-sm text-[var(--text-secondary)]">10:00 - 11:30 AM</span>
+                            </div>
+                            <p class="text-sm text-[var(--text-secondary)]">Speaker: Dr. Jane Smith</p>
+                            <div class="mt-2 flex items-center">
+                                <span class="inline-block h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+                                <span class="text-xs">Live Now</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start pb-4">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8575bc7b-8781-4f2a-9e1e-11289128713a.png" alt="Mid-age male speaker in glasses explaining technical concepts with digital slides" class="rounded-full" />
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between">
+                                <h3 class="font-medium">Technical Workshop</h3>
+                                <span class="text-sm text-[var(--text-secondary)]">2:00 - 3:30 PM</span>
+                            </div>
+                            <p class="text-sm text-[var(--text-secondary)]">Speaker: Mark Johnson</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Q&A Section -->
+            <section class="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-sm">
+                <h2 class="text-xl font-bold mb-4">Questions & Answers</h2>
+                <div class="space-y-3">
+                    <div class="border-l-4 border-blue-500 pl-4 py-2">
+                        <div class="flex justify-between">
+                            <div class="font-medium">How does the new API differ from v2?</div>
+                            <div class="flex items-center">
+                                <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded">Technical</span>
+                                <button class="ml-2 text-blue-500 hover:text-blue-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-sm text-[var(--text-secondary)]">Asked by: <span class="font-medium">Sarah K.</span> (15 mins ago)</div>
+                        <div class="mt-2 collapse-content hidden">
+                            <div class="pl-4 py-2 bg-blue-50 rounded">
+                                <div class="flex items-start mb-2">
+                                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5911c190-8e60-4b5c-87b2-301032fe2dca.png" alt="Female speaker with blond hair smiling in professional attire" class="rounded-full" />
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Answer from Jane Smith</p>
+                                        <p class="text-sm">The new API includes improved error handling and simplified authentication...</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-4 mt-2 text-sm">
+                                    <button class="text-blue-500 hover:text-blue-700">Follow up</button>
+                                    <button class="text-gray-500 hover:text-gray-700 tooltip">
+                                        Helpful
+                                        <span class="tooltip-text">Mark as helpful</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Poll Results -->
+            <section class="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-sm">
+                <h2 class="text-xl font-bold mb-4">Poll Results</h2>
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-medium mb-2">How often do you use our product?</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <span class="w-16 text-sm text-[var(--text-secondary)]">Daily</span>
+                                <div class="flex-grow h-6 bg-gray-200 rounded overflow-hidden">
+                                    <div class="h-full bg-green-500 poll-bar" style="width: 45%;">45%</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-16 text-sm text-[var(--text-secondary)]">Weekly</span>
+                                <div class="flex-grow h-6 bg-gray-200 rounded overflow-hidden">
+                                    <div class="h-full bg-blue-500 poll-bar" style="width: 30%;">30%</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-16 text-sm text-[var(--text-secondary)]">Monthly</span>
+                                <div class="flex-grow h-6 bg-gray-200 rounded overflow-hidden">
+                                    <div class="h-full bg-yellow-500 poll-bar" style="width: 15%;">15%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Participants List -->
+            <section class="bg-[var(--bg-secondary)] p-6 rounded-lg shadow-sm">
+                <h2 class="text-xl font-bold mb-4">Participants</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-300">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Name</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Sessions</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Questions</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Poll Votes</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Engagement</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-4 py-3 flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/70d30fc6-edfd-4421-b439-e9a1b3d47585.png" alt="Middle-aged Asian male participant wearing glasses and formal shirt" class="rounded-full" />
+                                    </div>
+                                    <span>Michael Chen</span>
+                                </td>
+                                <td class="px-4 py-3">3/5</td>
+                                <td class="px-4 py-3">5</td>
+                                <td class="px-4 py-3">2</td>
+                                <td class="px-4 py-3">
+                                    <div class="radial-progress text-green-500" style="--value:85; --size:2rem;">85%</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/66de7a37-e4a0-4bfc-bc12-77697dc31707.png" alt="Young African-American female participant with curly hair and bright smile" class="rounded-full" />
+                                    </div>
+                                    <span>Lisa Williams</span>
+                                </td>
+                                <td class="px-4 py-3">4/5</td>
+                                <td class="px-4 py-3">7</td>
+                                <td class="px-4 py-3">3</td>
+                                <td class="px-4 py-3">
+                                    <div class="radial-progress text-green-500" style="--value:92; --size:2rem;">92%</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', newTheme);
+            
+            // Save preference to localStorage
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Check for saved theme preference
+        if (localStorage.getItem('theme')) {
+            document.body.setAttribute('data-theme', localStorage.getItem('theme'));
+        }
+
+        // Expand/collapse Q&A items
+        document.querySelectorAll('.border-l-4 button').forEach(button => {
+            button.addEventListener('click', function() {
+                const content = this.closest('.border-l-4').querySelector('.collapse-content');
+                content.classList.toggle('hidden');
+                
+                // Toggle icon
+                const icon = this.querySelector('svg');
+                if (icon) {
+                    icon.classList.toggle('transform');
+                    icon.classList.toggle('rotate-180');
+                }
+            });
+        });
+
+        // Initialize poll bar animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const bars = document.querySelectorAll('.poll-bar');
+            bars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 200);
+            });
+        });
+
+        // Simulated data update (in a real app, this would be from an API)
+        setInterval(() => {
+            const engagement = Math.min(100, Math.floor(Math.random() * 5) + 76);
+            const radial = document.querySelector('.radial-progress');
+            if (radial) {
+                radial.style.setProperty('--value', engagement);
+                radial.textContent = `${engagement}%`;
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
+
