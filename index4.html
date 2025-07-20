@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Engagement Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(ellipse at bottom, #0f172a 0%, #020617 100%);
+            z-index: 9999;
+            transition: opacity 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.1);
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-top: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
+        }
+        .participant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        body {
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/3c9d3c78-d27b-4b2b-ae28-ae8ab87c4c42.png');
+            background-size: cover;
+            background-attachment: fixed;
+            animation: twinkle 10s infinite;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+        .container {
+            background-color: rgba(15, 23, 42, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(56, 182, 255, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            color: white;
+            border: 1px solid rgba(56, 182, 255, 0.2);
+        }
+        .container:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        .metric-card {
+            transition: all 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1359a008-3187-4b20-80da-3512c3c64dc7.png" 
+             alt="Logo" 
+             class="h-32 w-32 animate-pulse">
+        <div class="loading-spinner"></div>
+    </div>
+    <div class="min-h-screen" style="display: none;">
+        <!-- Header -->
+        <header class="gradient-bg text-white shadow-lg">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1359a008-3187-4b20-80da-3512c3c64dc7.png" alt="Engagement Tracker logo - a stylized graph icon with upward trend line in blue and white" class="h-10 w-10 rounded-full">
+                        <h1 class="text-2xl font-bold">Event Engagement Tracker</h1>
+                    </div>
+                    <div>
+                        <button id="export-btn" class="bg-white text-blue-600 px-4 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">
+                            Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- AI Assistant Button -->
+        <div id="ai-assistant" class="fixed bottom-8 right-8 z-50">
+            <button id="ai-button" class="bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-all animate-pulse hover:animate-bounce">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </button>
+            <div id="ai-chat" class="hidden absolute bottom-20 right-0 w-80 bg-slate-900 rounded-lg shadow-xl p-4 border border-indigo-400/50">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                <div class="flex items-center mb-4">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/3c9d3c78-d27b-4b2b-ae28-ae8ab87c4c42.png" alt="AI Assistant" class="w-10 h-10 rounded-full mr-2">
+                    <h3 class="font-bold text-lg">Event Assistant</h3>
+                </div>
+                <div id="ai-messages" class="h-48 overflow-y-auto mb-4">
+                    <div class="bg-gray-100 p-3 rounded-lg mb-2">
+                        <p>Hello! I'm your event assistant. How can I help you today?</p>
+                    </div>
+                </div>
+                <div class="flex">
+                    <input type="text" id="ai-input" placeholder="Ask about event data..." class="flex-1 border rounded-l-lg p-2">
+                    <button id="ai-send" class="bg-blue-600 text-white px-4 rounded-r-lg">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <main class="container mx-auto px-4 py-8" style="background-color: rgba(255, 255, 255, 0.85); transform-style: preserve-3d;">
+            <!-- Dashboard Overview -->
+            <section class="mb-12">
+                <h2 class="text-xl font-semibold mb-6 text-indigo-200">Event Engagement Dashboard</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Participants -->
+                    <div class="bg-slate-800 rounded-lg shadow p-6 cursor-pointer metric-card floating hover:shadow-indigo-500/50" onclick="window.location.href='part.html'">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-indigo-200">Total Participants</p>
+                                <h3 class="text-3xl font-bold text-white">247</h3>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-500">16% increase from last event</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Avg Engagement Score -->
+                    <div class="bg-slate-800 rounded-lg shadow p-6 cursor-pointer metric-card floating hover:shadow-indigo-500/50" onclick="window.location.href='record.html'">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Avg Engagement Score</p>
+                                <h3 class="text-3xl font-bold text-gray-800">72/100</h3>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-500">+5 points from average</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Sessions Attended -->
+                    <div class="bg-white rounded-lg shadow p-6 cursor-pointer" onclick="window.location.href='repo.html'">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Avg Sessions Attended</p>
+                                <h3 class="text-3xl font-bold text-gray-800">4.2/8</h3>
+                            </div>
+                            <div class="bg-purple-100 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-500">52.5% attendance rate</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Resource Downloads -->
+                    <div class="bg-white rounded-lg shadow p-6 cursor-pointer" onclick="window.location.href='workshops-slides.html'">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Resource Downloads</p>
+                                <h3 class="text-3xl font-bold text-gray-800">183</h3>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-500">12 downloads per session</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Engagement Score Chart -->
+                <div class="bg-white rounded-lg shadow p-8 mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">Engagement Score Distribution</h3>
+                        <div class="flex space-x-2">
+                            <select id="score-filter" class="border border-gray-300 rounded-md px-3 py-1 text-sm">
+                                <option>All Participants</option>
+                                <option>Top 25%</option>
+                                <option>Bottom 25%</option>
+                            </select>
+                        </div>
+                    </div>
+                    <canvas id="engagementChart" height="300"></canvas>
+                </div>
+                
+                <!-- Participation Breakdown -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-8">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Participation by Activity</h3>
+                        <canvas id="activityChart" height="250"></canvas>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-8">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Engagement Trend</h3>
+                        <canvas id="trendChart" height="250"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Participant List -->
+            <section class="mb-12">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Participant Engagement</h2>
+                    <div class="flex space-x-2">
+                        <input type="text" placeholder="Search participants..." class="border border-gray-300 rounded-md px-3 py-1">
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto bg-white rounded-lg shadow">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participant</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sessions</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Polls</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Q&A</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Downloads</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Engagement</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Sample participant row -->
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10">
+                                            <img class="h-10 w-10 rounded-full" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/305d33ba-69a4-49ab-9b97-c2999826d425.png" alt="Portrait of Alex Johnson, a young professional with short brown hair and friendly expression">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Alex Johnson</div>
+                                            <div class="text-sm text-gray-500">alex@example.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">5/8</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">12</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">7</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">9</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-24 h-2 bg-gray-200 rounded-full">
+                                            <div class="h-2 bg-green-500 rounded-full" style="width: 85%"></div>
+                                        </div>
+                                        <span class="ml-3 text-sm font-medium text-gray-900">85</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button class="text-blue-600 hover:text-blue-900" onclick="window.location.href='details.html'">Details</button>
+                                </td>
+                            </tr>
+                            
+                            <!-- More participant rows... -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-4 flex justify-between items-center">
+                    <div class="text-sm text-gray-500">Showing 1 to 10 of 247 participants</div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Previous</button>
+                        <button class="px-3 py-1 border border-gray-300 bg-blue-100 text-blue-700 rounded-md text-sm">1</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">2</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">3</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Next</button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Engagement Criteria Section -->
+            <section class="mb-12">
+                <h2 class="text-xl font-semibold mb-6 text-gray-800">Engagement Scoring Model</h2>
+                
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-800 mb-4">Attendance (30%)</h3>
+                            <p class="text-gray-600 mb-4">Points based on number of sessions attended out of total available.</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-800 mb-4">Participation (40%)</h3>
+                            <p class="text-gray-600 mb-4">Points for in-session activities like polls and Q&A.</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-green-600 h-2.5 rounded-full" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-800 mb-4">Resource Usage (30%)</h3>
+                            <p class="text-gray-600 mb-4">Points for downloading and engaging with provided materials.</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-purple-600 h-2.5 rounded-full" style="width: 30%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Handle loading screen
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                document.getElementById('loading-screen').style.opacity = '0';
+                document.querySelector('.min-h-screen').style.display = 'block';
+                
+                setTimeout(function() {
+                    document.getElementById('loading-screen').style.display = 'none';
+                }, 500);
+            }, 2000);
+
+            // Initialize charts when DOM is loaded
+            // Engagement Score Distribution Chart
+            const engagementCtx = document.getElementById('engagementChart').getContext('2d');
+            const engagementChart = new Chart(engagementCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-20', '21-40', '41-60', '61-80', '81-100'],
+                    datasets: [{
+                        label: 'Participant Count',
+                        data: [12, 28, 45, 90, 72],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(249, 168, 37, 0.7)',
+                            'rgba(234, 179, 8, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(249, 168, 37, 1)',
+                            'rgba(234, 179, 8, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.parsed.y} participants`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Participants'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Engagement Score Range'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Participation by Activity Chart
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            const activityChart = new Chart(activityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Sessions Attended', 'Poll Responses', 'Q&A Questions', 'Resource Downloads'],
+                    datasets: [{
+                        data: [35, 25, 15, 25],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(249, 168, 37, 0.7)',
+                            'rgba(168, 85, 247, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(249, 168, 37, 1)',
+                            'rgba(168, 85, 247, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.parsed}% of total`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Engagement Trend Chart
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            const trendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Session 1', 'Session 2', 'Session 3', 'Session 4', 'Session 5', 'Session 6', 'Session 7', 'Session 8'],
+                    datasets: [{
+                        label: 'Average Engagement Score',
+                        data: [65, 59, 68, 72, 76, 75, 80, 82],
+                        fill: false,
+                        borderColor: 'rgb(59, 130, 246)',
+                        tension: 0.3,
+                        pointBackgroundColor: 'rgb(59, 130, 246)',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }, {
+                        label: 'Participants',
+                        data: [187, 165, 180, 192, 178, 195, 190, 185],
+                        fill: false,
+                        borderColor: 'rgb(16, 185, 129)',
+                        tension: 0.3,
+                        pointBackgroundColor: 'rgb(16, 185, 129)',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        borderDash: [5, 5]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return `Avg Score: ${context.parsed.y}`;
+                                    } else {
+                                        return `Participants: ${context.parsed.y}`;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 50,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Engagement Score'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: false,
+                            position: 'right',
+                            min: 150,
+                            max: 200
+                        }
+                    }
+                }
+            });
+
+            // Filter functionality
+            document.getElementById('score-filter').addEventListener('change', function() {
+                const filterValue = this.value;
+                let newData;
+                
+                if (filterValue === 'Top 25%') {
+                    newData = [0, 0, 0, 35, 72];
+                } else if (filterValue === 'Bottom 25%') {
+                    newData = [12, 28, 45, 0, 0];
+                } else {
+                    newData = [12, 28, 45, 90, 72];
+                }
+                
+                engagementChart.data.datasets[0].data = newData;
+                engagementChart.update();
+            });
+
+            // Export button functionality
+            document.getElementById('export-btn').addEventListener('click', function() {
+                alert('Export functionality would be implemented here. This might generate a CSV or PDF report of engagement data.');
+            });
+
+            // AI Assistant functionality
+            const aiButton = document.getElementById('ai-button');
+            const aiChat = document.getElementById('ai-chat');
+            const aiMessages = document.getElementById('ai-messages');
+            const aiInput = document.getElementById('ai-input');
+            const aiSend = document.getElementById('ai-send');
+
+            aiButton.addEventListener('click', () => {
+                aiChat.classList.toggle('hidden');
+            });
+
+            aiSend.addEventListener('click', processAIRequest);
+            aiInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') processAIRequest();
+            });
+
+            async function processAIRequest() {
+                const question = aiInput.value.trim();
+                if (!question) return;
+
+                // Add user message
+                aiMessages.innerHTML += `
+                    <div class="bg-blue-100 text-blue-800 p-3 rounded-lg mb-2 text-right">
+                        <p>${question}</p>
+                    </div>
+                `;
+
+                // Create thinking indicator
+                const thinking = document.createElement('div');
+                thinking.className = 'bg-gray-100 p-3 rounded-lg mb-2';
+                thinking.innerHTML = '<p>Thinking...</p>';
+                aiMessages.appendChild(thinking);
+                
+                // Scroll to bottom
+                aiMessages.scrollTop = aiMessages.scrollHeight;
+                aiInput.value = '';
+
+                try {
+                    // Here you would normally call an API
+                    // For demo, we'll use a simple lookup
+                    const response = await generateAIResponse(question);
+                    
+                    // Replace thinking with actual response
+                    thinking.innerHTML = `<p>${response}</p>`;
+                } catch (error) {
+                    thinking.innerHTML = '<p class="text-red-500">Sorry, I encountered an error.</p>';
+                }
+            }
+
+            function generateAIResponse(question) {
+                // Simple question matching for demo
+                // In real app, you'd call Google's Generative AI API or similar
+                const lowerQ = question.toLowerCase();
+                
+                if (lowerQ.includes('participant') || lowerQ.includes('attendee')) {
+                    return `Currently there are 247 participants with an average engagement score of 72. The top participant has a score of 97.`;
+                } else if (lowerQ.includes('session') || lowerQ.includes('attendance')) {
+                    return `Average session attendance is 52.5% across 8 sessions. The most attended session had 192 participants.`;
+                } else if (lowerQ.includes('download') || lowerQ.includes('resource')) {
+                    return `There have been 183 resource downloads, averaging 12 per session. The most popular resource has been downloaded 45 times.`;
+                } else {
+                    return `I can help with: participant counts, session data, engagement scores, and resource downloads. For example, try asking "How many participants are there?"`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
